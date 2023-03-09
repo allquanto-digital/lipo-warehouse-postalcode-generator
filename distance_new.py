@@ -31,7 +31,9 @@ logger.addHandler(fileHandler)
 def csv_reader_without_header(filename: str):
     logger.debug(f"Opening CSV {filename}")
     with open(filename, "r") as csv_file:
-        reader = csv.reader(csv_file, delimiter=";")
+        dialect = csv.Sniffer().sniff(csv_file.read(1024), delimiters=';,')
+        csv_file.seek(0)
+        reader = csv.reader(csv_file, dialect=dialect)
         next(reader)
         yield reader
 
