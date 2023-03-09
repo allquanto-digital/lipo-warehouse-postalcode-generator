@@ -48,6 +48,7 @@ def main(gmaps_key: str):
                     fieldnames=[
                         "origin",
                         "destination",
+                        "kanton",
                         "country",
                         "distance",
                     ],
@@ -105,6 +106,7 @@ def main(gmaps_key: str):
                                         "destination": nearest_leg[
                                             "end_address"
                                         ].rpartition(",")[0],
+                                        "kanton": zip_code[2],
                                         "country": nearest_leg[
                                             "end_address"
                                         ].rpartition(",")[-1],
