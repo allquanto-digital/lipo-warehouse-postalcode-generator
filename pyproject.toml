@@ -1,0 +1,31 @@
+[tool.poetry]
+name = "lipo-warehouse-postalcode-generator"
+version = "0.1.0"
+description = ""
+authors = ["Icaro Martins <icaro@allquanto.com>"]
+readme = "README.md"
+packages = [{include = "lipo_warehouse_postalcode_generator"}]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+googlemaps = "^4.10.0"
+geopy = "^2.3.0"
+
+
+[tool.commitizen]
+name = "cz_conventional_commits"
+version = "0.1.0"
+tag_format = "$version"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.isort]
+profile = "black"
+line_length = 79
+
+[tool.black]
+line-length = 79
+target-version = ['py39']
+include = '\.pyi?$'
