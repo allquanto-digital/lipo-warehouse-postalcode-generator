@@ -48,14 +48,14 @@ def print_version(ctx, param, value):
     "--aereal-distance",
     type=click.INT,
     required=True,
-    help="""Aereal distance in meters""",
+    help="""Driving distance in meters""",
 )
 @click.option(
     "-D",
     "--driving-distance",
     type=click.INT,
     required=True,
-    help="""Driving distance in meters""",
+    help="""Aereal distance in meters""",
 )
 @click.option(
     "-o",

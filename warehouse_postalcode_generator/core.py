@@ -81,8 +81,7 @@ def get_postal_codes(
                                 if aereal.m > aereal_distance:
                                     logger.warning(
                                         f"Destination: {destiny_str} aereal "
-                                        "distance is greater than expected"
-                                        f"({aereal.m})"
+                                        "distance is greater than expected."
                                     )
                                     continue
 
