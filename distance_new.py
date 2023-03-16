@@ -4,12 +4,14 @@ import logging
 import os
 import contextlib
 import sys
+from geopy.distance import great_circle
+import math
 
 
 ORIGIN_FILE = "filialen.csv"
 DESTINY_FILE = "CH_PLZ_reduced_plus.csv"
-OUTPUT_FILE = 'nearest_addresses.csv'
-LOG_FILE = 'distance_gmap.log'
+OUTPUT_FILE = "nearest_addresses.csv"
+LOG_FILE = "distance_gmap.log"
 MIN_DISTANCE = 11000
 
 # logger = logging.getLogger()
@@ -31,11 +33,19 @@ logger.addHandler(fileHandler)
 def csv_reader_without_header(filename: str):
     logger.debug(f"Opening CSV {filename}")
     with open(filename, "r") as csv_file:
-        dialect = csv.Sniffer().sniff(csv_file.read(1024), delimiters=';,')
+        dialect = csv.Sniffer().sniff(csv_file.read(1024), delimiters=";,")
         csv_file.seek(0)
         reader = csv.reader(csv_file, dialect=dialect)
         next(reader)
         yield reader
+
+
+def get_greatcircle_distance(data: dict):
+    origin_location = data["start_location"]
+    destiny_location = data["end_location"]
+    origin = (origin_location["lat"], origin_location["lng"])
+    destiny = (destiny_location["lat"], destiny_location["lng"])
+    return great_circle(origin, destiny)
 
 
 def main(gmaps_key: str):
@@ -53,14 +63,15 @@ def main(gmaps_key: str):
                         "kanton",
                         "country",
                         "distance",
+                        "gcd",
                     ],
                 )
                 csv_writer.writeheader()
                 for address in filialen:
                     for zip_code in zip_code_file:
                         try:
-                            address_str=" ".join(address)
-                            destiny_str=" ".join(zip_code)
+                            address_str = " ".join(address)
+                            destiny_str = " ".join(zip_code)
                             response = gmaps.directions(
                                 origin=address_str,
                                 destination=destiny_str,
@@ -74,18 +85,20 @@ def main(gmaps_key: str):
                                 dist["legs"][0]["distance"]["value"]
                                 for dist in response
                             ]
-                            logger.debug(f'Distances to {destiny_str} are: {distances}')
+                            logger.debug(
+                                f"Distances to {destiny_str} are: {distances}"
+                            )
 
                             try:
                                 nearest = min(distances)
                             except ValueError:
                                 logger.error(
-                                    f'Address {address_str} returned 0 '
-                                    f'routes, Skipping...'
+                                    f"Address {address_str} returned 0 "
+                                    f"routes, Skipping..."
                                 )
                                 continue
-                            
-                            logger.debug(f'Minimal distance is {nearest}')
+
+                            logger.debug(f"Minimal distance is {nearest}")
 
                             if nearest <= MIN_DISTANCE:
                                 logger.info(
@@ -94,14 +107,14 @@ def main(gmaps_key: str):
                                     "in the file."
                                 )
                                 nearest_index = distances.index(nearest)
-                                nearest_leg = response[nearest_index]["legs"][0]
-                                # print({
-                                #         "distance": nearest_leg["distance"],
-                                #         "start_address": nearest_leg[
-                                #             "start_address"
-                                #         ],
-                                #         "end_addresss": nearest_leg["end_address"],
-                                # })
+                                nearest_leg = response[nearest_index]["legs"][
+                                    0
+                                ]
+
+                                gcd = get_greatcircle_distance(
+                                    response[nearest_index]["legs"][0]
+                                )
+
                                 csv_writer.writerow(
                                     {
                                         "origin": nearest_leg["start_address"],
@@ -115,6 +128,7 @@ def main(gmaps_key: str):
                                         "distance": nearest_leg["distance"][
                                             "value"
                                         ],
+                                        "gcd": int(math.floor(gcd.m)),
                                     }
                                 )
                                 continue
