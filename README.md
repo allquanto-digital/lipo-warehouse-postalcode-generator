@@ -35,27 +35,15 @@ warehouse_postalcode_generator \
 
 - Requires git
 
+### Using pip
+
 ```
 pip install git+https://github.com/allquanto-digital/lipo-warehouse-postalcode-generator.git
 ```
 
-## Run without installing
-
-- Requires cloning this repository
-- Requires poetry
-  Install with: pip install poetry
-
-### Via poetry shell
+### Using Make:
 
 ```
-poetry shell
-poetry install
-python -m warehouse_postalcode_generator
-```
-
-### Installing dependencies
-
-```
-poetry install --no-dev --no-root
-python -m warehouse_postalcode_generator
+make install
+hash -r
 ```
