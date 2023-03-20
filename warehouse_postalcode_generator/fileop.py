@@ -2,7 +2,7 @@ import csv
 import contextlib
 import logging
 
-logger = logging.getLogger('warehouse_postalcode_generator')
+logger = logging.getLogger("warehouse_postalcode_generator")
 
 
 @contextlib.contextmanager

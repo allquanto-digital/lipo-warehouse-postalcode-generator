@@ -6,7 +6,7 @@ import os
 from warehouse_postalcode_generator import __version__
 from .core import get_postal_codes
 
-logger = logging.getLogger('warehouse_postalcode_generator')
+logger = logging.getLogger("warehouse_postalcode_generator")
 
 CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
 
