@@ -65,8 +65,8 @@ def get_postal_codes(
                                     f"Destiny {coord.destiny.to_str} "
                                     f"driving distance ("
                                     f"{coord.shorter_driving_distance}) is "
-                                    "outside greater the minimal distance ("
-                                    f"{driving_distance}), but will"
+                                    "outside the minimal distance ("
+                                    f"{driving_distance}), but still will"
                                     "be added"
                                 )
                                 outputfile.writerow(coord.record)
