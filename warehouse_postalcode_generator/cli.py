@@ -6,7 +6,7 @@ import os
 from warehouse_postalcode_generator import __version__
 from .core import get_postal_codes
 
-logger = logging.getLogger('warehouse_postalcode_generator')
+logger = logging.getLogger("warehouse_postalcode_generator")
 
 CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
 
@@ -48,14 +48,14 @@ def print_version(ctx, param, value):
     "--aereal-distance",
     type=click.INT,
     required=True,
-    help="""Driving distance in meters""",
+    help="""Aereal distance in meters""",
 )
 @click.option(
     "-D",
     "--driving-distance",
     type=click.INT,
     required=True,
-    help="""Aereal distance in meters""",
+    help="""Driving distance in meters""",
 )
 @click.option(
     "-o",

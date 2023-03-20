@@ -2,7 +2,7 @@ from warehouse_postalcode_generator.cli import cli
 import logging
 import sys
 
-logger = logging.getLogger('warehouse_postalcode_generator')
+logger = logging.getLogger("warehouse_postalcode_generator")
 logger.setLevel(logging.DEBUG)
 
 logFormatter = logging.Formatter("%(asctime)s [%(levelname)s] %(message)s")

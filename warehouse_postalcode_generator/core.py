@@ -1,10 +1,9 @@
 from .fileop import csv_reader_without_header, csv_output_file
 import googlemaps
 import logging
-from geopy.distance import great_circle
-import math
+from .coordinates import Address, Destiny, Coordinate
 
-logger = logging.getLogger('warehouse_postalcode_generator')
+logger = logging.getLogger("warehouse_postalcode_generator")
 
 
 def list_to_str(l: list) -> str:
@@ -19,12 +18,14 @@ def locate_leg_by_index(distances: list, nearest: int, response: dict) -> dict:
     index = distances.index(nearest)
     return response[index]["legs"][0]
 
+
 def get_greatcircle_distance(data: dict):
     origin_location = data["start_location"]
     destiny_location = data["end_location"]
     origin = (origin_location["lat"], origin_location["lng"])
     destiny = (destiny_location["lat"], destiny_location["lng"])
     return great_circle(origin, destiny)
+
 
 def get_postal_codes(
     branches: str,
@@ -42,76 +43,42 @@ def get_postal_codes(
                 for address in branchfile:
                     for destiny in destinyfile:
                         try:
-                            address_str = list_to_str(address)
-                            destiny_str = list_to_str(destiny)
-                            response = gmaps_api.directions(
-                                origin=address_str,
-                                destination=destiny_str,
-                                mode="driving",
-                                alternatives=True,
-                                units="meters",
+                            coord = Coordinate(
+                                address=Address(*address),
+                                destiny=Destiny(*destiny),
+                                gmap=gmaps_api,
                             )
 
-                            distances = get_distances(response)
-
-                            try:
-                                nearest = min(distances)
-                            except ValueError:
-                                logger.error(
-                                    f"Address {address_str} returned 0 "
-                                    f"routes, Skipping..."
+                            if coord.aereal_distance > aereal_distance:
+                                logger.warning(
+                                    f"Destination {coord.destiny.to_str} "
+                                    f"aereal distance ({coord.aereal_distance})"
+                                    " is outside the mininal distance "
+                                    f"({aereal_distance}), Skipping"
                                 )
                                 continue
-
-                            logger.debug(f"Minimal distance is {nearest}")
-
-                            if nearest <= driving_distance:
+                            if (
+                                coord.shorter_driving_distance
+                                > driving_distance
+                            ):
                                 logger.info(
-                                    f"Destination: {destiny_str} is inside the "
-                                    f"minimal distance ({driving_distance})"
+                                    f"Destiny {coord.destiny.to_str} "
+                                    f"driving distance ("
+                                    f"{coord.shorter_driving_distance}) is "
+                                    "outside the minimal distance ("
+                                    f"{driving_distance}), but still will"
+                                    "be added"
                                 )
-                                leg = locate_leg_by_index(
-                                    distances=distances,
-                                    nearest=nearest,
-                                    response=response,
-                                )
-
-                                aereal = get_greatcircle_distance(leg)
-
-                                if aereal.m > aereal_distance:
-                                    logger.warning(
-                                        f"Destination: {destiny_str} aereal "
-                                        "distance is greater than expected."
-                                    )
-                                    continue
-
-                                logger.info(
-                                    f"Destination: {destiny_str} aereal "
-                                    "distance are inside the range "
-                                    f"({aereal_distance})"
-                                )
-                                outputfile.writerow(
-                                    {
-                                        "origin": leg["start_address"],
-                                        "destination": leg["end_address"],
-                                        "kanton": destiny[2],
-                                        "country": leg[
-                                            "end_address"
-                                        ].rpartition(",")[-1],
-                                        "driving_distance": leg["distance"][
-                                            "value"
-                                        ],
-                                        "aereal_distance": int(
-                                            math.floor(aereal.m)
-                                        ),
-                                    }
-                                )
-
+                                outputfile.writerow(coord.record)
                                 continue
-                            logger.warning(
-                                f"Destination: {destiny_str} is too far away, "
-                                f"minimum distance is {nearest}"
+                            logger.info(
+                                f"Destiny {coord.destiny.to_str} matches "
+                                f"all criteria driving distance: "
+                                f"{coord.shorter_driving_distance}, aereal: "
+                                f"{coord.aereal_distance}, expected: "
+                                f"{driving_distance} and {aereal_distance}"
                             )
+                            outputfile.writerow(coord.record)
                         except Exception as e:
                             logger.error(f"{e}", exc_info=True)
                             raise
