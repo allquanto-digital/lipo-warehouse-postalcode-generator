@@ -1,7 +1,7 @@
 from .fileop import csv_reader_without_header, csv_output_file
 import googlemaps
 import logging
-from .coordinates import Address, Destiny, Coordinate
+from .coordinates import Address, Destiny, Coordinate, NoRoutesFound
 
 logger = logging.getLogger("warehouse_postalcode_generator")
 
@@ -79,6 +79,9 @@ def get_postal_codes(
                                 f"{driving_distance} and {aereal_distance}"
                             )
                             outputfile.writerow(coord.record)
+                        except NoRoutesFound:
+                            logger.info('No routes, skipping...')
+                            continue
                         except Exception as e:
                             logger.error(f"{e}", exc_info=True)
                             raise
