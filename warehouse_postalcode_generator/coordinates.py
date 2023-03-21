@@ -30,6 +30,8 @@ class Destiny:
         return f"{self.zip_code} {self.location} {self.city}"
 
 
+class NoRoutesFound(Exception):
+    pass
 class Coordinate:
     def __init__(
         self, address: Address, destiny: Destiny, gmap: GMapsClient
@@ -64,8 +66,8 @@ class Coordinate:
         try:
             nearest = min(self.__driving_distances)
         except ValueError:
-            ...
-            # NO routes found
+            logger.error(f'No routes found for address {self.address.to_str}')
+            raise NoRoutesFound(f'No routes found for address {self.address.to_str}')
 
         route_index = self.__driving_distances.index(nearest)
         self.__shorter_driving_route = self.__drivingroutes[route_index][
